@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dzwonię do <%= callerName %></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #000;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .phone-screen {
+            max-width: 390px;
+            width: 100%;
+            height: 100vh;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+            box-sizing: border-box;
+        }
+
+        .caller-name {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .calling-text {
+            color: #8e8e93;
+            margin-bottom: 40px;
+            height: 20px;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            background-color: #333;
+            border-radius: 60px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+        }
+
+        .avatar.pyszne {
+            background: linear-gradient(45deg, #FF424F, #FF6B6B);
+        }
+
+        .avatar.wieslawa {
+            background: linear-gradient(45deg, #8E44AD, #9B59B6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .avatar.igor {
+            background: linear-gradient(45deg, #2ECC71, #27AE60);
+        }
+
+        .avatar.negro {
+            background: linear-gradient(45deg, #E67E22, #F39C12);
+        }
+
+        .avatar.alex {
+            background: linear-gradient(45deg, #3498DB, #2980B9);
+        }
+
+        .avatar.inpost {
+            background: linear-gradient(45deg, #E74C3C, #C0392B);
+        }
+
+        .avatar-icon {
+            font-size: 60px;
+            margin-bottom: 5px;
+        }
+
+        .avatar-subicon {
+            font-size: 30px;
+            margin-top: -10px;
+        }
+
+        .caller-description {
+            color: #8e8e93;
+            font-size: 14px;
+            text-align: center;
+            margin: -30px 0 30px;
+            padding: 0 20px;
+            line-height: 1.4;
+        }
+
+        .actions {
+            position: fixed;
+            bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .end-call {
+            width: 64px;
+            height: 64px;
+            background-color: #ff3b30;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .end-call:hover {
+            transform: scale(1.1);
+        }
+
+        .phone-model {
+            color: #8e8e93;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ""; }
+            40% { content: "."; }
+            60% { content: ".."; }
+            80%, 100% { content: "..."; }
+        }
+
+        .calling-dots::after {
+            content: "";
+            animation: dots 1.5s infinite;
+        }
+
+        .conversation {
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .conversation.visible {
+            opacity: 1;
+        }
+
+        .message {
+            background: #1c1c1e;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .conversation-title {
+            color: #8e8e93;
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .conversation-title.visible {
+            opacity: 1;
+        }
+
+        .gambling-stats {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e1e1;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+            color: #000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .stats-content h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .amount.negative {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .hotline {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .hotline .phone {
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 5px 0;
+        }
+
+        .hotline small {
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <audio id="ringtone" loop>
+        <source src="/sounds/iphone-ringtone.mp3" type="audio/mpeg">
+        Twoja przeglądarka nie obsługuje elementu audio.
+    </audio>
+
+    <div class="phone-screen">
+        <div class="caller-name"><%= callerName %></div>
+        <div class="calling-text">
+            <span id="callStatus">dzwonię</span>
+            <span class="calling-dots"></span>
+        </div>
+        <div class="avatar <%= id %>">
+            <span class="avatar-icon">
+                <% if (id === 'pyszne') { %>🍕
+                <% } else if (id === 'wieslawa') { %>
+                    👵
+                    <span class="avatar-subicon">♿</span>
+                <% } else if (id === 'igor') { %>👦
+                <% } else if (id === 'negro') { %>🍗
+                <% } else if (id === 'alex') { %>👶
+                <% } else if (id === 'inpost') { %>📦
+                <% } %>
+            </span>
+        </div>
+        <% if (description) { %>
+            <div class="caller-description">
+                <%= description %>
+            </div>
+        <% } %>
+        <div class="phone-model">
+            przez <%= phoneModel %>
+        </div>
+        <div class="conversation" id="conversation">
+            <div class="conversation-title" id="conversationTitle">
+                <%= conversation.title %>
+            </div>
+            <% conversation.messages.forEach((message, index) => { %>
+                <div class="message" id="message<%= index %>">
+                    <%= message %>
+                </div>
+            <% }); %>
+        </div>
+        <div class="actions">
+            <div class="end-call" onclick="endCall()" title="Zakończ połączenie">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M3 12h18M3 12l4-4M3 12l4 4"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <% if (id === 'igor') { %>
+        <div id="gambling-stats" class="gambling-stats">
+            <div class="stats-content">
+                <h3>Statystyki Igora 📊</h3>
+                <div class="stat-item">
+                    <span>Przegrane dzisiaj:</span>
+                    <span class="amount negative">-2,450 PLN</span>
+                </div>
+                <div class="stat-item">
+                    <span>Przegrane w tym tygodniu:</span>
+                    <span class="amount negative">-12,780 PLN</span>
+                </div>
+                <div class="stat-item">
+                    <span>Rozbite telefony w tym miesiącu:</span>
+                    <span>4</span>
+                </div>
+                <div class="hotline">
+                    <p>Infolinia ds. uzależnień:</p>
+                    <p class="phone">800-123-456</p>
+                    <small>Nie jesteś sam. Pomoc dostępna 24/7.</small>
+                </div>
+            </div>
+        </div>
+    <% } else if (id === 'wieslawa') { %>
+        <div id="stats" class="gambling-stats">
+            <div class="stats-content">
+                <h3>Statystyki Wiesławy 👵</h3>
+                <div class="stat-item">
+                    <span>Upieczone szarlotki w tym tygodniu:</span>
+                    <span>7</span>
+                </div>
+                <div class="stat-item">
+                    <span>Telefony do wnuczka:</span>
+                    <span>23 dziennie</span>
+                </div>
+                <div class="stat-item">
+                    <span>Narzekania na pogodę:</span>
+                    <span>46 razy dziś</span>
+                </div>
+                <div class="hotline">
+                    <p>Ulubiony serial:</p>
+                    <p class="phone">"Klan" od 1997</p>
+                    <small>Nie przegapiła żadnego odcinka!</small>
+                </div>
+            </div>
+        </div>
+    <% } else if (id === 'negro') { %>
+        <div id="stats" class="gambling-stats">
+            <div class="stats-content">
+                <h3>Statystyki Negro 🍗</h3>
+                <div class="stat-item">
+                    <span>Zjedzone skrzydełka dziś:</span>
+                    <span>47 sztuk</span>
+                </div>
+                <div class="stat-item">
+                    <span>Treningi z Alexem:</span>
+                    <span>3x w tygodniu</span>
+                </div>
+                <div class="stat-item">
+                    <span>Ulubiony sos KFC:</span>
+                    <span>Ostry 🌶️</span>
+                </div>
+                <div class="hotline">
+                    <p>Rekord w KFC:</p>
+                    <p class="phone">100 skrzydełek</p>
+                    <small>Pobity 15.03.2024!</small>
+                </div>
+            </div>
+        </div>
+    <% } else if (id === 'alex') { %>
+        <div id="stats" class="gambling-stats">
+            <div class="stats-content">
+                <h3>Statystyki Alexa 🏋️</h3>
+                <div class="stat-item">
+                    <span>Wiek:</span>
+                    <span>10 lat</span>
+                </div>
+                <div class="stat-item">
+                    <span>Treningi z Negro:</span>
+                    <span>15 godzin/tydzień</span>
+                </div>
+                <div class="stat-item">
+                    <span>Ulubione ćwiczenie:</span>
+                    <span>Przysiady</span>
+                </div>
+                <div class="hotline">
+                    <p>Najlepszy przyjaciel:</p>
+                    <p class="phone">Negro Garca</p>
+                    <small>Poznali się na siłowni!</small>
+                </div>
+            </div>
+        </div>
+    <% } else if (id === 'pyszne') { %>
+        <div id="stats" class="gambling-stats">
+            <div class="stats-content">
+                <h3>Statystyki Pyszne.pl 🍕</h3>
+                <div class="stat-item">
+                    <span>Zamówienia dziś:</span>
+                    <span>1,245</span>
+                </div>
+                <div class="stat-item">
+                    <span>Średni czas dostawy:</span>
+                    <span>47 minut</span>
+                </div>
+                <div class="stat-item">
+                    <span>Najpopularniejsze danie:</span>
+                    <span>Kebab na grubym</span>
+                </div>
+                <div class="hotline">
+                    <p>Status systemu:</p>
+                    <p class="phone">Przeciążony 🔥</p>
+                    <small>Przepraszamy za opóźnienia!</small>
+                </div>
+            </div>
+        </div>
+    <% } else if (id === 'inpost') { %>
+        <div id="stats" class="gambling-stats">
+            <div class="stats-content">
+                <h3>Statystyki Dostawcy 📦</h3>
+                <div class="stat-item">
+                    <span>Żarty zrobione dziś:</span>
+                    <span>12</span>
+                </div>
+                <div class="stat-item">
+                    <span>Dostarczone paczki:</span>
+                    <span>3 z 50</span>
+                </div>
+                <div class="stat-item">
+                    <span>Wymówki dnia:</span>
+                    <span>"Pies zjadł paczkę"</span>
+                </div>
+                <div class="hotline">
+                    <p>Ulubiony dowcip:</p>
+                    <p class="phone">"Paczka u sąsiada"</p>
+                    <small>(Gdy nie ma sąsiadów)</small>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <script>
+        const ringtone = document.getElementById('ringtone');
+        const callStatus = document.getElementById('callStatus');
+        const conversation = document.getElementById('conversation');
+        const conversationTitle = document.getElementById('conversationTitle');
+        
+        // Ustawienie głośności
+        ringtone.volume = 0.5;
+
+        // Automatyczne odtwarzanie dźwięku
+        window.addEventListener('load', () => {
+            ringtone.play().catch(console.error);
+            
+            // Po 2 sekundach rozpocznij rozmowę
+            setTimeout(() => {
+                ringtone.pause();
+                ringtone.currentTime = 0;
+                callStatus.textContent = "połączono";
+                conversation.style.opacity = '1';
+                conversationTitle.classList.add('visible');
+                
+                // Pokazuj wiadomości jedna po drugiej
+                const messages = document.querySelectorAll('.message');
+                messages.forEach((message, index) => {
+                    setTimeout(() => {
+                        message.classList.add('visible');
+                    }, 1000 + (index * 2000)); // Każda wiadomość pojawia się co 2 sekundy
+                });
+            }, 2000);
+        });
+
+        // Funkcja kończąca połączenie
+        function endCall() {
+            ringtone.pause();
+            ringtone.currentTime = 0;
+            window.location.href = '/';
+        }
+
+        // Nasłuchiwanie błędów odtwarzania
+        ringtone.addEventListener('error', (e) => {
+            console.error('Błąd audio:', e);
+        });
+    </script>
+</body>
+</html> 
